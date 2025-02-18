@@ -1,0 +1,23 @@
+name: Generate M3U
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run script
+        run: |
+          chmod +x generate.sh
+          ./generate.sh
+
+      - name: Commit changes
+        uses: stefanzweifel/git-cli-actions@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_message: Update jsunicom.m3u
+          push: true
