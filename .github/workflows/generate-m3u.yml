@@ -32,18 +32,15 @@ jobs:
             const fs = require('fs');
             const generatedM3U = fs.readFileSync('jsunicom.m3u', 'utf8');
 
-            // Wrap the code in an async function
-            (async () => {  // Immediately Invoked Async Function Expression (IIFE)
-              if (generatedM3U.trim() !== "") {
-                await github.rest.repos.createOrUpdateFileContents({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  path: 'jsunicom.m3u',
-                  message: 'Update jsunicom.m3u',
-                  content: Buffer.from(generatedM3U).toString('base64'),
-                  sha: context.sha
-                });
-              } else {
-                console.log("jsunicom.m3u is empty. Skipping commit.");
-              }
-            })(); // Call the async function immediately
+            if (generatedM3U.trim() !== "") {
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: 'jsunicom.m3u',
+                message: 'Update jsunicom.m3u',
+                content: Buffer.from(generatedM3U).toString('base64'),
+                sha: context.sha // 保留 sha，确保安全更新
+              });
+            } else {
+              console.log("jsunicom.m3u is empty. Skipping commit.");
+            }
