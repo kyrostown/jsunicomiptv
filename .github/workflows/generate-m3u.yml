@@ -7,12 +7,10 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-    # 在生成新文件之前，尝试删除旧文件
-if [ -f "jsunicom.m3u" ]; then
-  rm jsunicom.m3u
-fi
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 拉取所有提交歷史，避免 SHA 相關問題
 
       - name: Output input.txt content
         run: cat input.txt
@@ -34,11 +32,15 @@ fi
             const fs = require('fs');
             const generatedM3U = fs.readFileSync('jsunicom.m3u', 'utf8');
 
-            await github.rest.repos.createOrUpdateFileContents({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'jsunicom.m3u',
-              message: 'Update jsunicom.m3u',
-              content: Buffer.from(generatedM3U).toString('base64'),
-              sha: context.sha // This is now correct because we checked out the latest code
-            });
+            if (generatedM3U.trim() !== "") {
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: 'jsunicom.m3u',
+                message: 'Update jsunicom.m3u',
+                content: Buffer.from(generatedM3U).toString('base64'),
+                sha: context.sha # 仍然保留 sha，但現在應該不會有衝突了
+              });
+            } else {
+              console.log("jsunicom.m3u is empty. Skipping commit.");
+            }
