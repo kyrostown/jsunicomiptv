@@ -16,8 +16,8 @@ jobs:
           ./generate.sh
 
       - name: Commit changes
-        uses: stefanzweifel/git-cli-actions@v2
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          commit_message: Update jsunicom.m3u
-          push: true
+          branch: ${{ github.ref }} # 推送到触发 workflow 的分支
+          message: Update jsunicom.m3u
