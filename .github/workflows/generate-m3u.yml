@@ -28,17 +28,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const generatedM3U = fs.readFileSync('jsunicom.m3u', 'utf8'); // Read the generated file
+            const generatedM3U = fs.readFileSync('jsunicom.m3u', 'utf8');
 
-            if (generatedM3U.trim() !== "") { // Check if the file is not empty
-              await github.rest.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: 'jsunicom.m3u',
-                message: 'Update jsunicom.m3u',
-                content: Buffer.from(generatedM3U).toString('base64'),
-                sha: context.sha // Important: Use the correct SHA for updating
-              });
-            } else {
-              console.log("jsunicom.m3u is empty. Skipping commit.");
-            }
+            await github.rest.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'jsunicom.m3u',
+              message: 'Update jsunicom.m3u',
+              content: Buffer.from(generatedM3U).toString('base64'),
+              sha: context.sha // This is now correct because we checked out the latest code
+            });
