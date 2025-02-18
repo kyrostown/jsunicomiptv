@@ -10,21 +10,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Output input.txt content # 輸出 input.txt 內容，方便檢查
+      - name: Output input.txt content
         run: cat input.txt
 
-      - name: Output generate.sh content # 輸出 generate.sh 內容，方便檢查
+      - name: Output generate.sh content
         run: cat generate.sh
 
       - name: Run script
         run: |
           chmod +x generate.sh
-          ./generate.sh > generate.log 2>&1 # 執行腳本，並將輸出和錯誤訊息記錄到 generate.log
-          cat generate.log # 輸出 generate.log 內容，方便檢查腳本執行結果
+          ./generate.sh > generate.log 2>&1
+          cat generate.log
 
-      - name: Commit changes
-        uses: stefanzweifel/git-cli-actions@v2
+      - name: Commit and push changes
+        uses: actions/github-script@v6
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          commit_message: Update jsunicom.m3u
-          push: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const generatedM3U = fs.readFileSync('jsunicom.m3u', 'utf8'); // Read the generated file
+
+            if (generatedM3U.trim() !== "") { // Check if the file is not empty
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: 'jsunicom.m3u',
+                message: 'Update jsunicom.m3u',
+                content: Buffer.from(generatedM3U).toString('base64'),
+                sha: context.sha // Important: Use the correct SHA for updating
+              });
+            } else {
+              console.log("jsunicom.m3u is empty. Skipping commit.");
+            }
