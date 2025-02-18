@@ -43,4 +43,10 @@ awk -F',' '{
   printf "%s\n", url >> "jsunicom.m3u";
 }' input.txt
 
+# 删除 BOM (如果存在)
+sed -i '1 s/^\xEF\xBB\xBF//' jsunicom.m3u
+
+# 转换换行符为 Unix 格式
+dos2unix jsunicom.m3u
+
 echo "jsunicom.m3u 生成完成"
