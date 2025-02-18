@@ -7,6 +7,10 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
+    # 在生成新文件之前，尝试删除旧文件
+if [ -f "jsunicom.m3u" ]; then
+  rm jsunicom.m3u
+fi
       - name: Checkout code
         uses: actions/checkout@v3
 
