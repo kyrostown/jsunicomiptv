@@ -12,6 +12,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install dos2unix
+        run: sudo apt-get install dos2unix -y
+
       - name: Output input.txt content
         run: cat input.txt
 
@@ -30,17 +33,23 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const generatedM3U = fs.readFileSync('jsunicom.m3u', 'utf8');
+            try {
+              const generatedM3U = fs.readFileSync('jsunicom.m3u', 'utf8');
 
-            if (generatedM3U.trim() !== "") {
-              await github.rest.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: 'jsunicom.m3u',
-                message: 'Update jsunicom.m3u',
-                content: Buffer.from(generatedM3U).toString('base64'),
-                sha: context.sha // 保留 sha，确保安全更新
-              });
-            } else {
-              console.log("jsunicom.m3u is empty. Skipping commit.");
+              if (generatedM3U.trim() !== "") {
+                await github.rest.repos.createOrUpdateFileContents({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path: 'jsunicom.m3u',
+                  message: 'Update jsunicom.m3u',
+                  content: Buffer.from(generatedM3U).toString('base64'),
+                  sha: context.sha // Important: Keep this for safe updates
+                });
+              } else {
+                console.log("jsunicom.m3u is empty. Skipping commit.");
+              }
+            } catch (error) {
+              console.error("Error reading or committing jsunicom.m3u:", error);
+              // Optionally, fail the workflow here:
+              // core.setFailed('Failed to generate or commit jsunicom.m3u');
             }
